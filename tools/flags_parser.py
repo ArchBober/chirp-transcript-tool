@@ -80,6 +80,7 @@ def parse_flags() -> Tuple[Dict[str, object], List[str]]:
         "prompt": ns.prompt,
         "no_tuning": ns.no_tuning,
         "from_file": ns.from_file,
+        "from_dir": ns.from_dir,
     }
 
     if flags["prompt"] and (flags["from_file"] or flags["from_dir"]):
