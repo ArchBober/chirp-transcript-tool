@@ -27,23 +27,8 @@ def main():
         secret_json_filepath
     )
 
-    if "--help" in sys.argv:
-        print(HELP_DESCRIPTION)
-        sys.exit(0)
+   
 
-    verbose = "--verbose" in sys.argv
-    prompt = "--prompt" in sys.argv
-    no_tuning = "--no-tuning" in sys.argv
-
-    args = []
-    for arg in sys.argv[1:]:
-        if not arg.startswith("--"):
-            args.append(arg)
-
-    if prompt:
-        if len(args[0].strip()) < 1:
-            print("Prompt too short. Exiting.")
-            sys.exit(1)
 
     llm_response = ""
 
