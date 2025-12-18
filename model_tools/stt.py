@@ -7,11 +7,10 @@ import gc
 import warnings
 import logging
 
-logging.getLogger("whisperx").disabled = True
+logging.getLogger("whisperx.asr").setLevel(logging.ERROR)
 
 warnings.filterwarnings(
     "ignore",
-    category=UserWarning,
 )
 
 def stt_timestamps(audio_path, verbose: bool = False):

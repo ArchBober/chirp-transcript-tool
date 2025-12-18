@@ -4,6 +4,7 @@ from google.cloud import texttospeech
 
 from dotenv import load_dotenv
 import os
+import asyncio
 
 from model_tools.llm import llm
 from model_tools.tts_chirp import tts_chirp
@@ -34,9 +35,6 @@ def main():
     if flags["verbose"]:
         print("Initializing TTS client")
 
-    client_tts = texttospeech.TextToSpeechLongAudioSynthesizeClient(
-        credentials=credentials
-    )
 
     if flags["prompt"]:
         transcripts = {}
@@ -59,15 +57,20 @@ def main():
     else:
         llm_responses = transcripts.copy()
 
-
-    filepaths = tts_chirp(client_tts, llm_responses, bucket_name, credentials, OUTPUT_AUDIO_DIR, flags["no_bucket_preserve"], flags["verbose"])
-
+    filepaths = asyncio.run(
+        tts_chirp(
+            llm_responses, 
+            bucket_name, 
+            credentials, 
+            OUTPUT_AUDIO_DIR, 
+            flags["no_bucket_preserve"], 
+            flags["verbose"]
+            )
+        )
 
     cut_filepaths = cut_silence(filepaths, EDITED_AUDIO_DIR, flags['verbose'])
 
     timestamps = stt_timestamps(cut_filepaths, flags['verbose'])
-
-    # print(timestamps)
     
 
 if __name__ == "__main__":
