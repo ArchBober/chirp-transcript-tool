@@ -12,6 +12,7 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
             tokens_input_overall = 0.
             tokens_output_overall = 0.
             print(f"Setting LLM client for transcript tuning with model and getting response ({LLM_MODEL})")
+            print(f"---LLM Prompt---\n{prompt}\n-----------------\n")
 
         for key, val in input_content.items():
             response = client.models.generate_content(
@@ -51,7 +52,7 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
             print("\n===OVERALL COST===")
             print(f"Prompt tokens: {tokens_input_overall} --- Cost: {tokens_input_cost_overall:.8f} $")
             print(f"Response tokens: {tokens_output_overall} --- Cost: {tokens_output_cost_overall:.8f} $")
-            print(f"Summary: {tokens_input_overall+tokens_output_overall} --- Cost: {tokens_input_cost_overall+tokens_output_cost_overall} $")
+            print(f"Summary: {tokens_input_overall+tokens_output_overall} tokens --- {tokens_input_cost_overall+tokens_output_cost_overall} $")
             print("===$$$===\n")
 
     except Exception as e:
