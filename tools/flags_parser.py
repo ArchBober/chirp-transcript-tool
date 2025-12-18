@@ -36,6 +36,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Skip any model-tuning steps."
     )
     parser.add_argument(
+        "--no-bucket-preserve",
+        action="store_true",
+        help="Remove output from bucket after getting response."
+    )
+    parser.add_argument(
         "--from-file",
         metavar="PATH",
         type=str,
@@ -45,7 +50,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--from-dir",
         metavar="PATH",
         type=str,
-        help="Load the prompt from a file instead of the command line."
+        help="Load the prompt from files in specified directory instead of the command line."
     )
     parser.add_argument(
         "--help",
