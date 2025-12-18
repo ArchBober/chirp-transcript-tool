@@ -7,6 +7,7 @@ import os
 
 from model_tools.llm import llm
 from model_tools.tts_chirp import tts_chirp
+from model_tools.stt import stt_timestamps
 
 from tools.flags_parser import parse_flags
 from tools.read_transcripts import read_transcripts
@@ -62,7 +63,11 @@ def main():
     filepaths = tts_chirp(client_tts, llm_responses, bucket_name, credentials, OUTPUT_AUDIO_DIR, flags["no_bucket_preserve"], flags["verbose"])
 
 
-    cut_silence(filepaths, EDITED_AUDIO_DIR, flags['verbose'])
+    cut_filepaths = cut_silence(filepaths, EDITED_AUDIO_DIR, flags['verbose'])
+
+    timestamps = stt_timestamps(cut_filepaths)
+
+    print(timestamps)
     
 
 if __name__ == "__main__":
