@@ -8,6 +8,5 @@ dependencies = [
     "google-cloud-storage>=3.7.0",
     "google-cloud-texttospeech>=2.33.0",
     "google-genai==1.12.1",
-    "openai-whisper>=20250625",
     "python-dotenv==1.1.0",
 ]
