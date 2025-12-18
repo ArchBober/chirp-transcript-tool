@@ -12,11 +12,15 @@ def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[s
         if verbose:
             overall_tokens = 0.
             overall_tokens_price = 0.
-            print(f"Setting TTS client with model (Chirp - {TTS_VOICE}) and sending request.")
+            print(f"Setting TTS client with model and storage client (Chirp - {TTS_VOICE}) and sending request.")
 
         filepaths = []
 
         voice, audio_config = _tts_configuration_init()
+
+        storage_client = storage.Client(credentials=credentials)
+
+        bucket = storage_client.bucket(bucket_name)
 
         for key, val in input_content.items():
             synthesis_input = texttospeech.SynthesisInput(
@@ -44,14 +48,15 @@ def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[s
             if verbose:
                 print(f"Downloading audio from bucket: {bucket_name}/{save_dir}/{file_name}")
 
-            storage_client = storage.Client(credentials=credentials)
-
-            bucket = storage_client.bucket(bucket_name)
-
             blob = bucket.blob(f"{save_dir}/{file_name}")
             blob.download_to_filename(save_filepath)
 
             filepaths.append(save_filepath)
+
+            if not preserve_file_in_bucket:
+                blob.delete()
+                if verbose:
+                    print(f"Blob deleted: {save_filepath}")
 
             if verbose:
                 print(f"Audio content written to file: {file_name}\n")
@@ -68,7 +73,7 @@ def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[s
             print("\n===OVERALL COST===")
             print(f"Tokens: {overall_tokens} --- Cost: {overall_tokens_price:.6f} $")
             print("===$$$===\n")
-    
+
     except Exception as e:
         print(f"\nError: {e}")
     
@@ -98,5 +103,3 @@ def _get_audio_filename(filename: str) -> str:
         raise Exception("multiple dots in text file")
     return filename_split[0] + "_" + time.strftime("%Y%m%d_%H%M%S") + ".wav"
 
-def _deletye_from_bucket(filename: str):
-    return None
