@@ -30,10 +30,17 @@ def main():
         secret_json_filepath
     )
 
+    if verbose:
+        print("Initializing TTS client")
+
+    client_tts = texttospeech.TextToSpeechLongAudioSynthesizeClient(
+        credentials=credentials
+    )
+
     flags, args = parse_flags()
 
     if flags["prompt"]:
-        transcripts = args.copy()
+        transcripts['prompt.txt'] = args.copy()
     else:
         path = args[0] if flags["from_file"] or flags["from_dir"] else TTS_TEXT_FILE
 
@@ -49,22 +56,15 @@ def main():
             vertexai=True, api_key=api_key
         )
 
-        llm_response = llm(client_llm, transcription, verbose, LLM_CHIRP_PROMPT)
+        llm_responses = llm(client_llm, transcripts, verbose, LLM_CHIRP_PROMPT)
+    else:
+        llm_responses = transcripts.copy()
 
-    if verbose:
-        print("Initializing TTS client")
-
-    client_tts = texttospeech.TextToSpeechLongAudioSynthesizeClient(
-        credentials=credentials
-    )
-
-    if not llm_response:
-        llm_response = transcription
 
     filepath = tts_chirp(client_tts, llm_response, bucket_name, credentials, OUTPUT_AUDIO_FILEPATH, verbose)
 
     if verbose:
-        print("Running cut silence")
+        print("Running ffmpeg remove silence")
 
     file_out = "tr_" + filepath
 

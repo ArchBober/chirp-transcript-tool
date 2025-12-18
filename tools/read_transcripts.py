@@ -16,7 +16,7 @@ def _read_file(path: str | Path) -> str:
 
     return transcription
 
-def read_transcripts(path: str | Path, dir_flag: bool) -> Dict[str, object]:
+def read_transcripts(path: str | Path, dir_flag: bool) -> Dict[str, str]:
     txt_contents: Dict[str, object] = {}
     base = Path(dir_path)
 
