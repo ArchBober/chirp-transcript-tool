@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import sys
 import os
 
-from model_tools.stt import stt
 from model_tools.llm import llm
 from model_tools.tts_chirp import tts_chirp
 

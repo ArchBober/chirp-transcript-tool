@@ -1,7 +1,7 @@
 from google import genai
 from google.genai import types
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from config import LLM_MODEL, LLM_INPUT_TOKEN_PRICE, LLM_OUTPUT_TOKEN_PRICE
 

@@ -1,7 +1,6 @@
 from google.cloud import texttospeech, storage
 import time
 
-from pydub import AudioSegment
 import io
 
 from typing import Tuple, Dict, List
