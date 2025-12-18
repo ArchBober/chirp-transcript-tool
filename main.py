@@ -58,7 +58,7 @@ def main():
         llm_responses = transcripts.copy()
 
 
-    # filepaths = tts_chirp(client_tts, llm_responses, bucket_name, credentials, OUTPUT_AUDIO_DIR, flags["--no-bucket-preserve"], flags["verbose"])
+    filepaths = tts_chirp(client_tts, llm_responses, bucket_name, credentials, OUTPUT_AUDIO_DIR, flags["no_bucket_preserve"], flags["verbose"])
 
 
     # cut_silence(filepaths, EDITED_AUDIO_DIR, flags['verbose'])
