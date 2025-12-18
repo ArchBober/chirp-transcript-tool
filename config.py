@@ -1,6 +1,8 @@
-from prompt_chirp_doc import prompt_chirp_doc
+from descriptions.prompt_chirp_doc import prompt_chirp_doc
 
 TTS_TEXT_FILE = 'tts_input_long.txt'
+
+OUTPUT_AUDIO_DIR = "response_audio"
 
 SPEAKING_RATE = 1.1 # 1 is default - use range 0.5-2.0
 
@@ -18,10 +20,10 @@ Try not to add many pauses (or even none) so conversation is straight forward.\n
 LLM_INPUT_TOKEN_PRICE = 4.
 LLM_OUTPUT_TOKEN_PRICE = 8.
 
-TTS_TEXT_TOKEN_PRICE = 30.
+TTS_CHIRP_TOKEN_PRICE = 30.
 
 # To del propably
-TTS_MODEL = "en-US-Chirp3-HD-Charon"
-STT_MODEL = "turbo" # tiny, base 1GB / small 2GB / medium 5GB / large 10 GB / turbo 6GB (VRAM)
+# TTS_MODEL = "en-US-Chirp3-HD-Charon"
+# STT_MODEL = "turbo" # tiny, base 1GB / small 2GB / medium 5GB / large 10 GB / turbo 6GB (VRAM)
 
-TTS_PROMPT=f""""""
+# TTS_PROMPT=f""""""

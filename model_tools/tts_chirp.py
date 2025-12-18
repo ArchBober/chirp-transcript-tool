@@ -4,81 +4,100 @@ import time
 from pydub import AudioSegment
 import io
 
-from config import TTS_MODEL, TTS_PROMPT, TTS_VOICE, LANGUAGE, SPEAKING_RATE, TTS_AUDIO_TOKEN_PRICE, TTS_TEXT_TOKEN_PRICE
+from typing import Tuple, Dict, List
 
-def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: str, bucket_name: str, credentials, save_filepath: str = "sample_output.mp3", verbose: bool = False) -> None:
+from config import TTS_VOICE, LANGUAGE, SPEAKING_RATE, TTS_CHIRP_TOKEN_PRICE
+
+def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", preserve_file_in_bucket = True, verbose: bool = False) -> List[str]:
     try:
         if verbose:
+            overall_tokens - 0.
+            overall_tokens_price = 0.
             print(f"Setting TTS client with model (Chirp - {TTS_VOICE}) and sending request.")
 
-        
-        synthesis_input = texttospeech.SynthesisInput(
-            text=input_content, 
-            # prompt=TTS_PROMPT
-        )
-        # print(synthesis_input)
-        voice = texttospeech.VoiceSelectionParams(
-            language_code=LANGUAGE,
-            name="en-US-Chirp3-HD-" + TTS_VOICE,
-            # model_name=TTS_MODEL
-        )
+        filepaths = []
 
-        audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.LINEAR16,
-            speaking_rate=SPEAKING_RATE
-        )
+        voice, audio_config = _tts_configuration_init()
 
-        # response = client_tts.synthesize_speech(
-        #     input=synthesis_input, voice=voice, audio_config=audio_config
-        # )
+        for key, val in input_content.items():
+            synthesis_input = texttospeech.SynthesisInput(
+                text=val,
+            )
 
-        ts = "response_" + time.strftime("%Y%m%d_%H%M%S") + ".wav"
+            file_name = _get_audio_filename(key)
+            save_filepath = save_dir + '/' + file_name
 
-        request = texttospeech.SynthesizeLongAudioRequest(
-            parent=f"projects/ia-agent-474100/locations/us-central1",
-            input=synthesis_input,
-            audio_config=audio_config,
-            voice=voice,
-            output_gcs_uri=f'gs://{bucket_name}/chirp_long_audio/{ts}',
+            request = texttospeech.SynthesizeLongAudioRequest(
+                parent=f"projects/ia-agent-474100/locations/us-central1",
+                input=synthesis_input,
+                audio_config=audio_config,
+                voice=voice,
+                output_gcs_uri=f'gs://{bucket_name}/chirp_long_audio/{file_name}',
+            )
 
-        )
+            if verbose:
+                print(f"Requesting Audio content to bucket: {bucket_name}")
+
+            operation = client_tts.synthesize_long_audio(request=request)
+
+            result = operation.result(timeout=300)
+
+            if verbose:
+                print(f"Downloading audio from bucket: {bucket_name}/chirp_long_audio/{file_name}")
+
+            storage_client = storage.Client(credentials=credentials)
+
+            bucket = storage_client.bucket(bucket_name)
+
+            blob = bucket.blob(f"chirp_long_audio/{file_name}")
+            blob.download_to_filename(save_filepath)
+
+            filepaths.append(save_filepath)
+
+            if verbose:
+                print(f"Audio content written to file: {file_name}")
+                tokens, tokens_price = _estimate_tts_price(input_content)
+
+                overall_tokens += tokens
+                overall_tokens_price += tokens_price
+
+                print("\n===COST===")
+                print(f"Tokens: {text_tokens} --- Cost: {text_tokens_price:.6f} $")
+                print("===$$$===\n")
 
         if verbose:
-            print(f"Requesting Audio content to bucket: {bucket_name}")
-
-        operation = client_tts.synthesize_long_audio(request=request)
-
-        result = operation.result(timeout=300)
-
-        if verbose:
-            print(f"Downloading audio from bucket: {bucket_name}/chirp_long_audio/{ts}")
-
-        storage_client = storage.Client(credentials=credentials)
-
-        bucket = storage_client.bucket(bucket_name)
-
-        blob = bucket.blob(f"chirp_long_audio/{ts}")
-        blob.download_to_filename(ts)
-
-        if verbose:
-            print(f"Audio content written to file: {ts}")
-
-            text_tokens, text_tokens_price, audio_tokens, audio_tokens_price = estimate_tts_price(input_content, "")
-            print("\n===COST===")
-            print(f"Text tokens: {text_tokens} --- Cost: {text_tokens_price:.6f} $")
-            print(f"Audio tokens: {audio_tokens} --- Cost: {audio_tokens_price:.6f} $")
+            print("\n===OVERALL COST===")
+            print(f"Tokens: {overall_tokens} --- Cost: {overall_tokens_price:.6f} $")
             print("===$$$===\n")
     
     except Exception as e:
         print(f"\nError: {e}")
     
-    return ts
+    return filepaths
 
-def estimate_tts_price(text: str, prompt: str):
-    audio_tokens_price = 0.
-    audio_tokens = 0.
+def _estimate_tts_price(text: str) -> (str, str):
+    tokens =  len(text)
+    tokens_price = tokens / 1_000_000 * TTS_CHIRP_TOKEN_PRICE
 
-    text_tokens =  len(text) + len(prompt)
-    text_tokens_price = text_tokens / 1_000_000 * TTS_TEXT_TOKEN_PRICE
+    return tokens, tokens_price
 
-    return text_tokens, text_tokens_price, audio_tokens, audio_tokens_price
+def _tts_configuration_init():
+    voice = texttospeech.VoiceSelectionParams(
+            language_code=LANGUAGE,
+            name="en-US-Chirp3-HD-" + TTS_VOICE,
+        )
+
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.LINEAR16,
+        speaking_rate=SPEAKING_RATE
+    )
+    return voice, audio_config
+
+def _get_audio_filename(filename: str) -> str:
+    filename_split = filename.split('.')
+    if filename_split > 2:
+        raise Exception("multiple dots in text file")
+    return filename_split[0] , "_" + time.strftime("%Y%m%d_%H%M%S") + ".wav"
+
+def _deletye_from_bucket(filename: str):
+    return None

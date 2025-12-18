@@ -14,7 +14,7 @@ from model_tools.tts_chirp import tts_chirp
 from tools.flags_parser import parse_flags
 from tools.read_transcripts import read_transcripts
 
-from config import OUTPUT_AUDIO_FILEPATH, TTS_TEXT_FILE, LLM_PROMPT, LLM_CHIRP_PROMPT
+from config import OUTPUT_AUDIO_DIR, TTS_TEXT_FILE, LLM_PROMPT, LLM_CHIRP_PROMPT
 from descriptions.help_description import HELP_DESCRIPTION
 
 import warnings
@@ -56,12 +56,12 @@ def main():
             vertexai=True, api_key=api_key
         )
 
-        llm_responses = llm(client_llm, transcripts, verbose, LLM_CHIRP_PROMPT)
+        llm_responses = llm(client_llm, transcripts, flags["verbose"], LLM_CHIRP_PROMPT)
     else:
         llm_responses = transcripts.copy()
 
 
-    filepath = tts_chirp(client_tts, llm_response, bucket_name, credentials, OUTPUT_AUDIO_FILEPATH, verbose)
+    filepaths = tts_chirp(client_tts, llm_responses, bucket_name, credentials, OUTPUT_AUDIO_DIR, flags["verbose"])
 
     if verbose:
         print("Running ffmpeg remove silence")
@@ -69,7 +69,7 @@ def main():
     file_out = "tr_" + filepath
 
     subprocess.run(
-        shlex.split(f'ffmpeg -y -i {filepath} -af silenceremove=stop_periods=-1:stop_duration=0.1:stop_threshold=-30dB {file_out}'),
+        shlex.split(f'ffmpeg -y -i {filepath} -af silenceremove=stop_periods=-1:stop_duration=0.2:stop_threshold=-40dB {file_out}'),
         stdout=subprocess.DEVNULL,
         check=True)
     
