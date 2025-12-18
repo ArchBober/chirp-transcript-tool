@@ -3,6 +3,7 @@ from descriptions.prompt_chirp_doc import prompt_chirp_doc
 TTS_TEXT_FILE = 'tts_input_long.txt'
 
 OUTPUT_AUDIO_DIR = "response_audio"
+EDITED_AUDIO_DIR = "edited_audio"
 
 SPEAKING_RATE = 1.1 # 1 is default - use range 0.5-2.0
 

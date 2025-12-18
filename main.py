@@ -3,7 +3,6 @@ from google import genai
 from google.cloud import texttospeech
 
 from dotenv import load_dotenv
-import subprocess, shlex
 import sys
 import os
 
@@ -13,8 +12,9 @@ from model_tools.tts_chirp import tts_chirp
 
 from tools.flags_parser import parse_flags
 from tools.read_transcripts import read_transcripts
+from tools.ffmpeg_cutter import cut_silence
 
-from config import OUTPUT_AUDIO_DIR, TTS_TEXT_FILE, LLM_PROMPT, LLM_CHIRP_PROMPT
+from config import OUTPUT_AUDIO_DIR, TTS_TEXT_FILE, LLM_PROMPT, LLM_CHIRP_PROMPT, EDITED_AUDIO_DIR
 from descriptions.help_description import HELP_DESCRIPTION
 
 import warnings
@@ -47,7 +47,6 @@ def main():
         transcripts = read_transcripts()
     
 
-
     if not flags["no_tuning"]:
         if verbose:
             print("Initializing LLM client")
@@ -61,26 +60,11 @@ def main():
         llm_responses = transcripts.copy()
 
 
-    filepaths = tts_chirp(client_tts, llm_responses, bucket_name, credentials, OUTPUT_AUDIO_DIR, flags["verbose"])
+    # filepaths = tts_chirp(client_tts, llm_responses, bucket_name, credentials, OUTPUT_AUDIO_DIR, flags["--no-bucket-preserve"], flags["verbose"])
 
-    if verbose:
-        print("Running ffmpeg remove silence")
 
-    file_out = "tr_" + filepath
-
-    subprocess.run(
-        shlex.split(f'ffmpeg -y -i {filepath} -af silenceremove=stop_periods=-1:stop_duration=0.2:stop_threshold=-40dB {file_out}'),
-        stdout=subprocess.DEVNULL,
-        check=True)
+    # cut_silence(filepaths, EDITED_AUDIO_DIR, flags['verbose'])
     
-    if verbose:
-        print(f"Done cut silence. File saved to trunc_{filepath}")
-
-
-
-
-
-
 
 if __name__ == "__main__":
     main()
