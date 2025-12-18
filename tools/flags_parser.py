@@ -42,14 +42,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--from-file",
-        metavar="PATH",
-        type=str,
+        action="store_true",
         help="Load the prompt from a file instead of the command line."
     )
     parser.add_argument(
         "--from-dir",
-        metavar="PATH",
-        type=str,
+        action="store_true",
         help="Load the prompt from files in specified directory instead of the command line."
     )
     parser.add_argument(
@@ -74,7 +72,7 @@ def parse_flags() -> Tuple[Dict[str, object], List[str]]:
     * ``args``  - a list of leftover positional arguments.
     """
     parser = _build_parser()
-    ns = parser.parse_args()
+    ns = parser.parse_args(sys.argv[1:])
 
     if ns.help:
         print(HELP_DESCRIPTION)

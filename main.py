@@ -29,7 +29,7 @@ def main():
     )
 
     flags, args = parse_flags()
-    
+
     if flags["verbose"]:
         print("Initializing TTS client")
 
@@ -42,7 +42,7 @@ def main():
     else:
         path = args[0] if flags["from_file"] or flags["from_dir"] else TTS_TEXT_FILE
 
-        transcripts = read_transcripts(path, flags["from_dir"])
+        transcripts = read_transcripts(path, flags["from_dir"], flags["verbose"])
     
 
     if not flags["no_tuning"]:

@@ -16,20 +16,33 @@ def _read_file(path: Path) -> str:
 
     return transcription
 
-def read_transcripts(path: str | Path, dir_flag: bool) -> Dict[str, str]:
+def read_transcripts(path: str | Path, dir_flag: bool, verbose: bool = False) -> Dict[str, str]:
     txt_contents: Dict[str, object] = {}
     base = Path(path)
 
+    if verbose:
+        print("Reading transcripts")
+
     if dir_flag:
+        if verbose:
+            print(f"Reading transcripts from firectory: {path}")
         if not base.is_dir():
             raise NotADirectoryError(f"{base} is not a valid directory")
 
         for txt_file in sorted(base.glob("*.txt")):
-            txt_contents[txt_file.name] = _read_file(path)
+            if verbose:
+                print(f"Loaded: {txt_file.name}")
+            txt_contents[txt_file.name] = _read_file(txt_file)
 
     else:
-       txt_contents[path] = _read_file(base)
+        if verbose:
+            print(f"Reading from file: {path}")
+        txt_contents[path] = _read_file(base)
+        if verbose:
+                print(f"Loaded: {path}")
 
+    if verbose:
+            print(f"Reading Transcripts Done")
     return txt_contents
 
 
