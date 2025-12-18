@@ -38,7 +38,8 @@ def main():
     )
 
     if flags["prompt"]:
-        transcripts['prompt.txt'] = args.copy()
+        transcripts = {}
+        transcripts['prompt.txt'] = args.copy()[0]
     else:
         path = args[0] if flags["from_file"] or flags["from_dir"] else TTS_TEXT_FILE
 
