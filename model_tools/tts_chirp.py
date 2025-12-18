@@ -2,6 +2,7 @@ from google.cloud import texttospeech, storage
 import time
 
 import io
+import gc
 
 from typing import Tuple, Dict, List
 
@@ -43,7 +44,7 @@ def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[s
 
             operation = client_tts.synthesize_long_audio(request=request)
 
-            result = operation.result(timeout=300)
+            result = operation.result(timeout=600)
 
             if verbose:
                 print(f"Downloading audio from bucket: {bucket_name}/{save_dir}/{file_name}")
@@ -57,6 +58,15 @@ def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[s
                 blob.delete()
                 if verbose:
                     print(f"Blob deleted: {save_filepath}")
+
+
+            if verbose:
+                print(f"Cleaning - free memory")
+
+            if 'blob' in locals(): del blob
+            if 'result' in locals(): del result
+            gc.collect()
+
 
             if verbose:
                 print(f"Audio content written to file: {file_name}\n")

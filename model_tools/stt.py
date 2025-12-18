@@ -2,6 +2,17 @@ import whisperx
 import whisper
 import torch
 import os
+import gc
+
+import warnings
+import logging
+
+logging.getLogger("whisperx").disabled = True
+
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+)
 
 def stt_timestamps(audio_path, verbose: bool = False):
     """
@@ -10,9 +21,16 @@ def stt_timestamps(audio_path, verbose: bool = False):
 
     # test_whisper(audio_path[0], verbose)
     os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = 'true'
+
+    # Get current LD_LIBRARY_PATH
+    # cudnn_path = os.environ.get("CDNN_PATH")
+    # ld_path = os.environ.get("LD_PATH")
+    # os.environ['LD_LIBRARY_PATH'] = cudnn_path
+
+    # print(cudnn_path)
     
     device = "cuda"
-    batch_size = 16 
+    batch_size = 8
     compute_type = "float16" if device == "cuda" else "int8"
     
     if verbose:
@@ -20,44 +38,76 @@ def stt_timestamps(audio_path, verbose: bool = False):
 
     model = whisperx.load_model("large-v2", device, compute_type=compute_type)
 
+    if verbose:
+        print("Loading allign model")
+
+    model_a, metadata = whisperx.load_align_model(language_code='en', device=device)
+
+
     for filepath in audio_path:
-        audio = whisperx.load_audio(filepath)
-        result = model.transcribe(audio, batch_size=batch_size)
+        try:
+            if verbose:
+                print("Transcribing audio")
+
+            audio = whisperx.load_audio(filepath)
+            result = model.transcribe(audio, batch_size=batch_size)
+
+            if verbose:
+                print("Cleaning memory - transcribe")
+
+
+            torch.cuda.empty_cache()
+
+            if verbose:
+                print("Generating timestamps")
+
+            
+            aligned_result = whisperx.align(
+                result["segments"], 
+                model_a, 
+                metadata, 
+                audio, 
+                device, 
+                return_char_alignments=False
+            )
+
+            word_timestamps = []
         
-        if verbose:
-            print("Cleaning memory")
+            for segment in aligned_result["segments"]:
+                for word in segment["words"]:
+                    if "start" in word:
+                        word_timestamps.append({
+                            "word": word["word"],
+                            "start": word["start"],
+                            "end": word["end"]
+                        })
 
-        del model
-        torch.cuda.empty_cache()
+            if verbose:
+                print(f"Timestamps for file {filepath} generated.")
+        except Exception as e:
+            print(f"Error processing {filepath}: {e}")
 
-        if verbose:
-            print("Generating timestamps...")
+        finally:
+            if verbose:
+                print("Cleaning")
 
-        model_a, metadata = whisperx.load_align_model(language_code='en', device=device)
+            if 'audio' in locals(): del audio
+            if 'result' in locals(): del result
+            if 'aligned_result' in locals(): del aligned_result
+            
+            # 2. Force Python Garbage Collector
+            gc.collect()
+            
+            # 3. Force PyTorch to empty the CUDA cache
+            torch.cuda.empty_cache()
+
         
-        aligned_result = whisperx.align(
-            result["segments"], 
-            model_a, 
-            metadata, 
-            audio, 
-            device, 
-            return_char_alignments=False
-        )
+    with open("timestamped_transcriptions/output.txt", "w", encoding="utf-8") as f:
+        f.write(str(word_timestamps))
 
-        word_timestamps = []
-        
-        for segment in aligned_result["segments"]:
-            for word in segment["words"]:
-                if "start" in word:
-                    word_timestamps.append({
-                        "word": word["word"],
-                        "start": word["start"],
-                        "end": word["end"]
-                    })
+    if verbose:
+        print("Transcribing done file saved to timestamped_transcriptions/output.txt")
 
-        if verbose:
-            print(f"Timestamps for file {filepath} generated.")
-    
     return word_timestamps
 
 def test_whisper(audio_filepath: str, verbose: bool = False) -> str:
