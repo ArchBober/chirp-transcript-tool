@@ -3,7 +3,6 @@ from google import genai
 from google.cloud import texttospeech
 
 from dotenv import load_dotenv
-import sys
 import os
 
 from model_tools.llm import llm
@@ -13,7 +12,7 @@ from tools.flags_parser import parse_flags
 from tools.read_transcripts import read_transcripts
 from tools.ffmpeg_cutter import cut_silence
 
-from config import OUTPUT_AUDIO_DIR, TTS_TEXT_FILE, LLM_PROMPT, LLM_CHIRP_PROMPT, EDITED_AUDIO_DIR
+from config import TTS_TEXT_FILE, LLM_CHIRP_PROMPT, OUTPUT_AUDIO_DIR, EDITED_AUDIO_DIR
 from descriptions.help_description import HELP_DESCRIPTION
 
 import warnings
@@ -29,25 +28,25 @@ def main():
         secret_json_filepath
     )
 
-    if verbose:
+    flags, args = parse_flags()
+    
+    if flags["verbose"]:
         print("Initializing TTS client")
 
     client_tts = texttospeech.TextToSpeechLongAudioSynthesizeClient(
         credentials=credentials
     )
 
-    flags, args = parse_flags()
-
     if flags["prompt"]:
         transcripts['prompt.txt'] = args.copy()
     else:
         path = args[0] if flags["from_file"] or flags["from_dir"] else TTS_TEXT_FILE
 
-        transcripts = read_transcripts()
+        transcripts = read_transcripts(path, flags["from_dir"])
     
 
     if not flags["no_tuning"]:
-        if verbose:
+        if flags["verbose"]:
             print("Initializing LLM client")
 
         client_llm = genai.Client(
