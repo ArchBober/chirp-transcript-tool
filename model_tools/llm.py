@@ -10,7 +10,7 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
         responses = {}
         if verbose:
             tokens_input_overall = 0.
-            tokens_output_cost = 0.
+            tokens_output_overall = 0.
             print(f"Setting LLM client for transcript tuning with model and getting response ({LLM_MODEL})")
 
         for key, val in input_content.items():
@@ -22,7 +22,10 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
                 ),
             )
 
-            reponses[key] = reponse.text
+            if verbose:
+                print("Got response - adding to list of responses")
+
+            responses[key] = response.text
 
             if verbose:
                 print("\n---Response---")
@@ -48,6 +51,7 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
             print("\n===OVERALL COST===")
             print(f"Prompt tokens: {tokens_input_overall} --- Cost: {tokens_input_cost_overall:.8f} $")
             print(f"Response tokens: {tokens_output_overall} --- Cost: {tokens_output_cost_overall:.8f} $")
+            print(f"Summary: {tokens_input_overall+tokens_output_overall} --- Cost: {tokens_input_cost_overall+tokens_output_cost_overall} $")
             print("===$$$===\n")
 
     except Exception as e:
@@ -57,8 +61,8 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
 
 
 def _calculate_price(tokens_input: int, tokens_output: int) -> Tuple[int, int]:
-    tokens_input_cost += tokens_input / 1_000_000 * LLM_INPUT_TOKEN_PRICE
-    tokens_output_cost += tokens_output / 1_000_000 * LLM_OUTPUT_TOKEN_PRICE
+    tokens_input_cost = tokens_input / 1_000_000 * LLM_INPUT_TOKEN_PRICE
+    tokens_output_cost = tokens_output / 1_000_000 * LLM_OUTPUT_TOKEN_PRICE
 
     return tokens_input_cost, tokens_output_cost
 

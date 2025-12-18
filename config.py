@@ -12,12 +12,16 @@ LANGUAGE="en-US"
 LLM_MODEL = "gemini-3-pro-preview"
 
 
+# LLM_CHIRP_PROMPT = f"""
+# Your job is to generate based on this documentation transcript for natural voice that will be added for CHIRP model for generating speech (TTS). DO NOT CHANGE ANY TEXT. 
+# You can only add elements that are described in documentation for more natural human voice. 
+# Only respond with updated text that you get and nothing more. 
+# Try not to add many pauses (or even none) so conversation is straight forward.\n
+# """ + prompt_chirp_doc
+
 LLM_CHIRP_PROMPT = f"""
-Your job is to generate based on this documentation transcript for natural voice that will be added for CHIRP model for generating speech (TTS). DO NOT CHANGE ANY TEXT. 
-You can only add elements that are described in documentation for more natural human voice. 
-Only respond with updated text that you get and nothing more. 
-Try not to add many pauses (or even none) so conversation is straight forward.\n
-""" + prompt_chirp_doc
+Testing code. Just return input.
+"""
 
 LLM_INPUT_TOKEN_PRICE = 4.
 LLM_OUTPUT_TOKEN_PRICE = 8.
