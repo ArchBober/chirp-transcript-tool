@@ -26,6 +26,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Enable verbose output."
     )
     parser.add_argument(
+        "--cost-single",
+        action="store_true",
+        help="Enable cost for single output."
+    )
+    parser.add_argument(
         "--prompt",
         action="store_true",
         help="Read the prompt from the command line (first positional arg)."
@@ -48,7 +53,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--from-dir",
         action="store_true",
-        help="Load the prompt from files in specified directory instead of the command line."
+        help="Load the transcripts from files in specified directory instead of the command line."
     )
     parser.add_argument(
         "--help",
@@ -80,6 +85,7 @@ def parse_flags() -> Tuple[Dict[str, object], List[str]]:
 
     flags = {
         "verbose": ns.verbose,
+        "cost_single": ns.cost_single,
         "prompt": ns.prompt,
         "no_tuning": ns.no_tuning,
         "from_file": ns.from_file,

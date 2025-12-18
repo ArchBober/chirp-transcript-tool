@@ -9,7 +9,7 @@ from typing import Tuple, Dict, List
 
 from config import TTS_VOICE, LANGUAGE, SPEAKING_RATE, TTS_CHIRP_TOKEN_PRICE
 
-async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", no_preserve_file_in_bucket = True, verbose: bool = False) -> List[str]:
+async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", no_preserve_file_in_bucket = True, cost_single: bool = False, verbose: bool = False) -> List[str]:
     # try:
     if verbose:
         overall_tokens = 0.
@@ -17,7 +17,7 @@ async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials
         print(f"Setting TTS client with model and storage client (Chirp - {TTS_VOICE}) and sending request.")
 
     # for key, val in input_content.items():
-    coros = [_get_audio(key, val, credentials, save_dir, bucket_name, no_preserve_file_in_bucket, verbose) for key, val in input_content.items()]
+    coros = [_get_audio(key, val, credentials, save_dir, bucket_name, no_preserve_file_in_bucket, cost_single, verbose) for key, val in input_content.items()]
 
 
     results = await asyncio.gather(*coros)
@@ -66,7 +66,8 @@ async def _get_audio(
     save_dir: str,
     bucket_name, 
     no_preserve_file_in_bucket,
-    verbose
+    cost_single: bool,
+    verbose: bool
 ):
     tokens = 0.
     tokens_price = 0.
@@ -88,24 +89,25 @@ async def _get_audio(
 
     file_name = _get_audio_filename(filename)
     save_filepath = save_dir + '/' + file_name
+    output_gcs_uri = f'gs://{bucket_name}/{save_dir}/{file_name}'
 
     request = texttospeech.SynthesizeLongAudioRequest(
         parent=f"projects/ia-agent-474100/locations/us-central1",
         input=synthesis_input,
         audio_config=audio_config,
         voice=voice,
-        output_gcs_uri=f'gs://{bucket_name}/{save_dir}/{file_name}',
+        output_gcs_uri=output_gcs_uri,
     )
 
     if verbose:
-        print(f"Requesting Audio content to bucket: {bucket_name}")
+        print(f"Requesting Audio content to bucket: {output_gcs_uri}")
 
     operation = await client_tts.synthesize_long_audio(request=request)
 
     await operation.result(timeout=600)
 
     if verbose:
-        print(f"Audio synthesized to GCS. Downloading: {bucket_name}/{save_dir}/{file_name}")
+        print(f"Audio synthesized to GCS. Downloading: {output_gcs_uri}")
 
     def download_and_cleanup():
         storage_client = storage.Client(credentials=credentials)
@@ -125,12 +127,12 @@ async def _get_audio(
     gc.collect()
 
     if verbose:
-        print(f"Finished: {file_name}\n")
+        print(f"Finished: {file_name}")
         tokens, tokens_price = _estimate_tts_price(transcript)
-
-        print("\n===COST===")
-        print(f"Tokens: {tokens} --- Cost: {tokens_price:.6f} $")
-        print("===$$$===\n")
+        if cost_single:
+            print("===COST===")
+            print(f"Tokens: {tokens} --- Cost: {tokens_price:.6f} $")
+            print("===$$$===")
 
     return save_filepath, tokens, tokens_price
 

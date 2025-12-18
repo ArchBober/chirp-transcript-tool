@@ -63,7 +63,8 @@ def main():
             bucket_name, 
             credentials, 
             OUTPUT_AUDIO_DIR, 
-            flags["no_bucket_preserve"], 
+            flags["no_bucket_preserve"],
+            flags["cost_single"],
             flags["verbose"]
             )
         )
