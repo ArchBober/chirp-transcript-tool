@@ -7,7 +7,7 @@ from typing import Tuple, Dict, List
 
 from config import TTS_VOICE, LANGUAGE, SPEAKING_RATE, TTS_CHIRP_TOKEN_PRICE
 
-def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", preserve_file_in_bucket = True, verbose: bool = False) -> List[str]:
+def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", no_preserve_file_in_bucket = True, verbose: bool = False) -> List[str]:
     try:
         if verbose:
             overall_tokens = 0.
@@ -53,7 +53,7 @@ def tts_chirp(client_tts: texttospeech.TextToSpeechClient, input_content: Dict[s
 
             filepaths.append(save_filepath)
 
-            if not preserve_file_in_bucket:
+            if no_preserve_file_in_bucket:
                 blob.delete()
                 if verbose:
                     print(f"Blob deleted: {save_filepath}")
