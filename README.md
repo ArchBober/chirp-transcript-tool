@@ -13,18 +13,19 @@ This code was writen as part of a learning project and is not a product software
 ## Table of Contents  
 
 1. [Features](#features)  
-2. [Architecture diagram](#architecture-diagram)  
-3. [Prerequisites](#prerequisites)  
-4. [Installation (UV)](#installation-uv)  
-5. [Configuration (environment variables & `config.py`)](#configuration)  
-6. [Command‑line interface](#cli)  
-7. [Pipeline walk‑through](#pipeline-walk-through)  
-8. [Examples](#examples)  
-9. [Cost reporting](#cost-reporting)  
-10. [Testing & debugging](#testing--debugging)  
-11. [Troubleshooting](#troubleshooting)  
-12. [Documentation / Bibliography](#bibliography)  
-13. [License](#license)  
+2. [Presentation](#presentation)
+3. [Architecture diagram](#architecture-diagram)  
+4. [Prerequisites](#prerequisites)  
+5. [Installation (UV)](#installation-uv)  
+6. [Configuration (environment variables & `config.py`)](#configuration)  
+7. [Command‑line interface](#cli)  
+8. [Pipeline walk‑through](#pipeline-walk-through)  
+9. [Examples](#examples)  
+10. [Cost reporting](#cost-reporting)  
+11. [Testing & debugging](#testing--debugging)  
+12. [Troubleshooting](#troubleshooting)  
+13. [Documentation / Bibliography](#bibliography)  
+14. [License](#license)  
 
 ---
 
@@ -40,6 +41,87 @@ This code was writen as part of a learning project and is not a product software
 | **Cost awareness** | Token‑based cost for Gemini, character‑based cost for Chirp‑HD‑3, printed per‑file and overall. |
 | **UV‑based packaging** | All dependencies declared in `pyproject.toml`; install with the fast, modern `uv` tool. |
 | **Extensible flag parser** | `tools/flags_parser.py` validates mutual exclusivity (`--prompt` vs `--from‑file/--from‑dir`). |
+
+---
+
+## Presentation
+
+### Input text (from file)
+```
+A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. When a faint flicker appeared, the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. The astronomer smiled, realizing the universe had been humming a song all along, waiting for someone to listen.
+```
+
+### Command
+```bash
+uv run main.py --from-file --no-bucket-preserve --verbose transcriptions/presentation_transcript.txt
+```
+
+### Log output
+<details>
+  <summary>Click here to expand</summary>
+  
+```
+Initializing TTS client
+Reading transcripts
+Reading from file: transcriptions/presentation_transcript.txt
+Loaded: transcriptions/presentation_transcript.txt
+Reading Transcripts Done
+Initializing LLM client
+Setting LLM client for transcript tuning with model and getting response (gemini-3-pro-preview)
+Got response - adding to list of responses
+
+---Response---
+A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. [pause short] When a faint flicker appeared, the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. [pause short] The astronomer smiled, realizing the universe had been humming a song all along... waiting for someone to listen.
+---------
+
+
+===OVERALL COST===
+Prompt tokens: 2007.0 --- Cost: 0.00802800 $
+Response tokens: 75.0 --- Cost: 0.00060000 $
+Summary: 2082.0 tokens --- 0.00862800 $
+===$$$===
+
+Setting TTS client with model and storage client (Chirp - Sadaltager) and sending request.
+Requesting Audio content to bucket: gs://bucket1/response_audio/presentation_transcript_20251219_134905.wav
+Audio synthesized to GCS. Downloading: gs://bucket1/response_audio/presentation_transcript_20251219_134905.wav
+Blob deleted: response_audio/presentation_transcript_20251219_134905.wav
+Finished: presentation_transcript_20251219_134905.wav
+
+===OVERALL COST===
+Tokens: 370 --- Cost: 0.011100 $
+===$$$===
+
+Running ffmpeg remove silence
+Removed silence and saved file to: edited_audio/presentation_transcript_20251219_134905.wav
+Done cut silence. Files saved to directory: edited_audio
+Loading WhisperX on cuda, batch_size = 8, compute_type = float16
+Loading allign model
+Transcribing audio
+Cleaning memory - transcribe
+Generating timestamps
+Timestamps for file edited_audio/presentation_transcript_20251219_134905.wav generated.
+Cleaning
+Transcribing done file saved to timestamped_transcriptions/output.txt
+```
+</details>
+
+### Tuned transcript (by Gemini-3-Pro-Preview)
+```
+A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. [pause short] When a faint flicker appeared, the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. [pause short] The astronomer smiled, realizing the universe had been humming a song all along... waiting for someone to listen.
+```
+
+### Audio from TTS model (Chirp - voice Sadaltager)
+
+🎵 [Click here to listen to the audio player](https://archbober.github.io/chirp-transcript-tool/audio_response.html)
+
+### Audio after removing silence
+
+🎵 [Click here to listen to the audio player](https://archbober.github.io/chirp-transcript-tool/audio_edit.html)
+
+### Transcript with timestamps from file (per word for now in List[dict[str,str]] form)
+```
+[{'word': 'A', 'start': np.float64(0.031), 'end': np.float64(0.613)}, {'word': 'lone', 'ord': 'pattern', 'start': np.float64(9.301), 'end': np.float64(9.642)}, ... -> ... {'word': 'listen.', 'start': np.float64(18.55), 'end': np.float64(19.052)}]
+```
 
 ---
 
