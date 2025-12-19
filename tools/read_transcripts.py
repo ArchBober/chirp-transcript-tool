@@ -37,7 +37,7 @@ def read_transcripts(path: str | Path, dir_flag: bool, verbose: bool = False) ->
     else:
         if verbose:
             print(f"Reading from file: {path}")
-        txt_contents[path] = _read_file(base)
+        txt_contents[path.split('/')[-1]] = _read_file(base)
         if verbose:
                 print(f"Loaded: {path}")
 

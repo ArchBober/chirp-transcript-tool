@@ -12,7 +12,6 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
             tokens_input_overall = 0.
             tokens_output_overall = 0.
             print(f"Setting LLM client for transcript tuning with model and getting response ({LLM_MODEL})")
-            print(f"---LLM Prompt---\n{prompt}\n-----------------\n")
 
         for key, val in input_content.items():
             response = client.models.generate_content(

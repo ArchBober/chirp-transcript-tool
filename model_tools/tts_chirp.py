@@ -92,7 +92,7 @@ async def _get_audio(
     output_gcs_uri = f'gs://{bucket_name}/{save_dir}/{file_name}'
 
     request = texttospeech.SynthesizeLongAudioRequest(
-        parent=f"projects/ia-agent-474100/locations/us-central1",
+        parent=f"projects/{credentials.project_id}/locations/us-central1",
         input=synthesis_input,
         audio_config=audio_config,
         voice=voice,
