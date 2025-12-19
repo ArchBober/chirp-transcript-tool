@@ -47,7 +47,7 @@ This code was writen as part of a learning project and is not a product software
 ## Presentation
 
 ### Input text (from file)
-```
+```text
 A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. When a faint flicker appeared, the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. The astronomer smiled, realizing the universe had been humming a song all along, waiting for someone to listen.
 ```
 
@@ -103,7 +103,8 @@ Transcribing done file saved to timestamped_transcriptions/output.txt
 ```
 
 ### Tuned transcript (by Gemini-3-Pro-Preview)
-```
+
+```text
 A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. [pause short] When a faint flicker appeared, the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. [pause short] The astronomer smiled, realizing the universe had been humming a song all along... waiting for someone to listen.
 ```
 
