@@ -69,35 +69,35 @@ Setting LLM client for transcript tuning with model and getting response (gemini
 Got response - adding to list of responses
 
 ---Response---
-A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. [pause short] When a faint flicker appeared, the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. [pause short] The astronomer smiled, realizing the universe had been humming a song all along... waiting for someone to listen.
+A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. When a faint flicker appeared... the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. The astronomer smiled, realizing the universe had been humming a song all along - waiting for someone to listen.
 ---------
 
 
 ===OVERALL COST===
 Prompt tokens: 2007.0 --- Cost: 0.00802800 $
-Response tokens: 75.0 --- Cost: 0.00060000 $
-Summary: 2082.0 tokens --- 0.00862800 $
+Response tokens: 67.0 --- Cost: 0.00053600 $
+Summary: 2074.0 tokens --- 0.00856400 $
 ===$$$===
 
 Setting TTS client with model and storage client (Chirp - Sadaltager) and sending request.
-Requesting Audio content to bucket: gs://bucket1/response_audio/presentation_transcript_20251219_134905.wav
-Audio synthesized to GCS. Downloading: gs://bucket1/response_audio/presentation_transcript_20251219_134905.wav
-Blob deleted: response_audio/presentation_transcript_20251219_134905.wav
-Finished: presentation_transcript_20251219_134905.wav
+Requesting Audio content to bucket: gs://bucket1/response_audio/presentation_transcript_20251219_143051.wav
+Audio synthesized to GCS. Downloading: gs://bucket1/response_audio/presentation_transcript_20251219_143051.wav
+Blob deleted: response_audio/presentation_transcript_20251219_143051.wav
+Finished: presentation_transcript_20251219_143051.wav
 
 ===OVERALL COST===
-Tokens: 370 --- Cost: 0.011100 $
+Tokens: 343 --- Cost: 0.010290 $
 ===$$$===
 
 Running ffmpeg remove silence
-Removed silence and saved file to: edited_audio/presentation_transcript_20251219_134905.wav
+Removed silence and saved file to: edited_audio/presentation_transcript_20251219_143051.wav
 Done cut silence. Files saved to directory: edited_audio
 Loading WhisperX on cuda, batch_size = 8, compute_type = float16
 Loading allign model
 Transcribing audio
 Cleaning memory - transcribe
 Generating timestamps
-Timestamps for file edited_audio/presentation_transcript_20251219_134905.wav generated.
+Timestamps for file edited_audio/presentation_transcript_20251219_143051.wav generated.
 Cleaning
 Transcribing done file saved to timestamped_transcriptions/output.txt
 ```
@@ -105,7 +105,7 @@ Transcribing done file saved to timestamped_transcriptions/output.txt
 ### Tuned transcript (by Gemini-3-Pro-Preview)
 
 ```text
-A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. [pause short] When a faint flicker appeared, the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. [pause short] The astronomer smiled, realizing the universe had been humming a song all along... waiting for someone to listen.
+A lone astronomer set up a telescope on a desert ridge, hoping the clear night sky would reveal a secret. When a faint flicker appeared... the instrument captured a pattern that spelled out a long‑lost melody encoded in starlight. The astronomer smiled, realizing the universe had been humming a song all along - waiting for someone to listen.
 ```
 
 ### Audio from TTS model (Chirp - voice Sadaltager)
@@ -118,7 +118,7 @@ A lone astronomer set up a telescope on a desert ridge, hoping the clear night s
 
 ### Transcript with timestamps from file (per word for now in List[dict[str,str]] form)
 ```
-[{'word': 'A', 'start': np.float64(0.031), 'end': np.float64(0.613)}, {'word': 'lone', 'ord': 'pattern', 'start': np.float64(9.301), 'end': np.float64(9.642)}, ... -> ... {'word': 'listen.', 'start': np.float64(18.55), 'end': np.float64(19.052)}]
+[{'word': 'A', 'start': np.float64(0.031), 'end': np.float64(0.573)}, {'word': 'lone', 'start': np.float64(0.593), 'end': np.float64(0.934)}, ... -> ...  {'word': 'listen.', 'start': np.float64(19.219), 'end': np.float64(19.66)}]
 ```
 
 ---
