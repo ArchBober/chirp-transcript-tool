@@ -5,7 +5,7 @@ from typing import List, Tuple, Dict
 
 from config import LLM_MODEL, LLM_INPUT_TOKEN_PRICE, LLM_OUTPUT_TOKEN_PRICE
 
-def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = False, prompt: str = "") -> Dict[str, str]:
+def llm(client: genai.Client, input_content: Dict[str, str], cost_single: bool = False, verbose: bool = False, prompt: str = "") -> Dict[str, str]:
     try:
         responses = {}
         if verbose:
@@ -40,18 +40,21 @@ def llm(client: genai.Client, input_content: Dict[str, str], verbose: bool = Fal
 
                 tokens_input_overall += tokens_input
                 tokens_output_overall += tokens_output
-                
-                print("\n===COST===")
-                print(f"Prompt tokens: {tokens_input} --- Cost: {tokens_input_cost:.8f} $")
-                print(f"Response tokens: {tokens_output} --- Cost: {tokens_output_cost:.8f} $")
-                print("===$$$===\n")
+                if cost_single:
+                    print("\n===COST===")
+                    print(f"Prompt tokens: {tokens_input} --- Cost: {tokens_input_cost:.8f} $")
+                    print(f"Response tokens: {tokens_output} --- Cost: {tokens_output_cost:.8f} $")
+                    print("===$$$===\n")
 
         if verbose:
             tokens_input_cost_overall, tokens_output_cost_overall = _calculate_price(tokens_input_overall, tokens_output_overall)
+            tokens_overall = tokens_input_overall+tokens_output_overall
+            tokens_cost_overall = tokens_input_cost_overall+tokens_output_cost_overall
+            
             print("\n===OVERALL COST===")
             print(f"Prompt tokens: {tokens_input_overall} --- Cost: {tokens_input_cost_overall:.8f} $")
             print(f"Response tokens: {tokens_output_overall} --- Cost: {tokens_output_cost_overall:.8f} $")
-            print(f"Summary: {tokens_input_overall+tokens_output_overall} tokens --- {tokens_input_cost_overall+tokens_output_cost_overall} $")
+            print(f"Summary: {tokens_overall} tokens --- {tokens_cost_overall:.8f} $")
             print("===$$$===\n")
 
     except Exception as e:

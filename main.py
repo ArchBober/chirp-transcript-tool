@@ -53,7 +53,7 @@ def main():
             vertexai=True, api_key=api_key
         )
 
-        llm_responses = llm(client_llm, transcripts, flags["verbose"], LLM_CHIRP_PROMPT)
+        llm_responses = llm(client_llm, transcripts, flags["cost_single"], flags["verbose"], LLM_CHIRP_PROMPT)
     else:
         llm_responses = transcripts.copy()
 
