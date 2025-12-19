@@ -57,8 +57,6 @@ uv run main.py --from-file --no-bucket-preserve --verbose transcriptions/present
 ```
 
 ### Log output
-<details>
-  <summary>Click here to expand</summary>
   
 ```
 Initializing TTS client
@@ -103,7 +101,6 @@ Timestamps for file edited_audio/presentation_transcript_20251219_134905.wav gen
 Cleaning
 Transcribing done file saved to timestamped_transcriptions/output.txt
 ```
-</details>
 
 ### Tuned transcript (by Gemini-3-Pro-Preview)
 ```
