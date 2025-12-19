@@ -1,32 +1,52 @@
 import whisperx
 import whisper
 import torch
-import os
 import gc
 
+import os
+import contextlib
+import sys
 import warnings
 import logging
 
-logging.getLogger("whisperx.asr").setLevel(logging.ERROR)
+# temp solution for 1000 warnings from whisper
+@contextlib.contextmanager
+def no_print():
+    # Open the null device (a black hole for data)
+    with open(os.devnull, "w") as devnull:
+        # 1. Get the file descriptors for stdout (1) and stderr (2)
+        old_stdout = sys.stdout.fileno()
+        old_stderr = sys.stderr.fileno()
 
-warnings.filterwarnings(
-    "ignore",
-)
+        # 2. Duplicate the original FDs so we can restore them later
+        saved_stdout = os.dup(old_stdout)
+        saved_stderr = os.dup(old_stderr)
+
+        # 3. Flush Python buffers to ensure no queued text gets printed
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+        try:
+            # 4. Redirect stdout and stderr to devnull at the OS level
+            os.dup2(devnull.fileno(), old_stdout)
+            os.dup2(devnull.fileno(), old_stderr)
+            yield
+        finally:
+            # 5. Restore the original file descriptors
+            os.dup2(saved_stdout, old_stdout)
+            os.dup2(saved_stderr, old_stderr)
+            
+            # 6. Clean up the duplicated FDs
+            os.close(saved_stdout)
+            os.close(saved_stderr)
 
 def stt_timestamps(audio_path, verbose: bool = False):
     """
     Takes an audio path, generates word-level timestamps using WhisperX.
     """
 
-    # test_whisper(audio_path[0], verbose)
+    # some magic errors from whisperx prevent from loading models
     os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = 'true'
-
-    # Get current LD_LIBRARY_PATH
-    # cudnn_path = os.environ.get("CDNN_PATH")
-    # ld_path = os.environ.get("LD_PATH")
-    # os.environ['LD_LIBRARY_PATH'] = cudnn_path
-
-    # print(cudnn_path)
     
     device = "cuda"
     batch_size = 8
@@ -35,12 +55,14 @@ def stt_timestamps(audio_path, verbose: bool = False):
     if verbose:
         print(f"Loading WhisperX on {device}, batch_size = {batch_size}, compute_type = {compute_type}")
 
-    model = whisperx.load_model("large-v2", device, compute_type=compute_type)
+    with no_print():
+        model = whisperx.load_model("large-v2", device, compute_type=compute_type)
 
     if verbose:
         print("Loading allign model")
 
-    model_a, metadata = whisperx.load_align_model(language_code='en', device=device)
+    with no_print():
+        model_a, metadata = whisperx.load_align_model(language_code='en', device=device)
 
 
     for filepath in audio_path:
@@ -48,8 +70,9 @@ def stt_timestamps(audio_path, verbose: bool = False):
             if verbose:
                 print("Transcribing audio")
 
-            audio = whisperx.load_audio(filepath)
-            result = model.transcribe(audio, batch_size=batch_size)
+            with no_print():
+                audio = whisperx.load_audio(filepath)
+                result = model.transcribe(audio, batch_size=batch_size)
 
             if verbose:
                 print("Cleaning memory - transcribe")

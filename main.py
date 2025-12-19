@@ -18,6 +18,14 @@ from config import TTS_TEXT_FILE, LLM_CHIRP_PROMPT, OUTPUT_AUDIO_DIR, EDITED_AUD
 from descriptions.help_description import HELP_DESCRIPTION
 
 import warnings
+import logging
+
+warnings.filterwarnings("ignore")
+logging.getLogger("whisperx").setLevel(logging.ERROR)
+logging.getLogger("lightning").setLevel(logging.ERROR)
+logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
+logging.getLogger("pyannote").setLevel(logging.ERROR)
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 def main():
     load_dotenv()
