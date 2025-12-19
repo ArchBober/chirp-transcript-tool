@@ -147,14 +147,14 @@ The script loads these with `python-dotenv`.
 |----------|---------|
 | `TTS_TEXT_FILE` | Default transcript used when no file flag is supplied. |
 | `OUTPUT_AUDIO_DIR` / `EDITED_AUDIO_DIR` | Where raw and cleaned audio are stored locally. |
-| `SPEAKING_RATE` | Default 1.1× (range 0.5‑2.0). |
+| `SPEAKING_RATE` | Default 1.0× (range 0.5‑2.0). |
 | `TTS_VOICE` | `"Sadaltager"` – a Chirp‑HD‑3 voice. |
 | `LANGUAGE` | `"en‑US"` – language code for TTS. |
-| `LLM_MODEL` | `"gemini-3-pro-preview"` – the Gemini model used for tuning. |
-| `LLM_CHIRP_PROMPT` | Prompt that injects the **Chirp‑HD‑3** scripting guidelines (see `descriptions/prompt_chirp_doc.py`). |
+| `LLM_MODEL` | `"gemini-3-pro-preview"` – the Gemini model used for tuning. (can be changed to cheaper one model) |
+| `LLM_CHIRP_PROMPT` | Prompt that injects the **Chirp‑HD‑3** scripting guidelines (see `descriptions/prompt_chirp_doc.py` and `config.py`). |
 | `LLM_INPUT_TOKEN_PRICE`, `LLM_OUTPUT_TOKEN_PRICE`, `TTS_CHIRP_TOKEN_PRICE` | Pricing constants (USD per M tokens/characters). Update them if Google changes its rates. |
 
-### Prompt documentation (`descriptions/prompt_chirp_doc.py`)  
+### Prompt documentation (`descriptions/prompt_chirp_doc.py` && `config.py`)  
 
 Contains the full “Scripting and prompting tips” you posted – the LLM uses this to add natural‑speech cues without altering the original meaning.
 
