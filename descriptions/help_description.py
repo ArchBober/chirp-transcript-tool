@@ -1,26 +1,52 @@
-HELP_DESCRIPTION = '''AI Speak-Think-Play Tool 0.1.0 for communicating with LLM model through audio file or prompt and getting speech response. 
-Designed mainly for polishing speaking in foreign languages with small privacy upgrade by using local Speech-To-Text (STT) model but can also be used for other purposes. 
-LLM and Text-To-Speech model is designed at the moment to use Gemini available models. 
-To use this project user needs to have set API key for Vertex AI service (set in .env under VERTEX_AI_API_KEY) and have OAuth2 secret json file available from Google Cloud services by setting up project and activating TTS api (json filepath need to be in .env under SECRET_JSON_FILEPATH).
-This is testing/learning project and by that i'm not taking responsibility for other users actions using this code. 
-By using/editing this code you take full responsibility for your actions and potential negative effects (ex. high token consuption, restricted GC services and more).
+HELP_DESCRIPTION = '''Usage: python -m main [OPTIONS] [ARGS...]
 
-[Usage]
-    uv run main.py [options] <input-audio-filepath>
-    uv run main.py [options] --prompt "<your prompt text>"
+A pipeline that converts text transcripts (or a raw prompt) into natural-sounding
+audio using Google Chirp HD-3, removes long pauses with ffmpeg, and extracts
+word-level timestamps with WhisperX.
 
-[Options]
-    --help - Show this text.
-    --prompt - Add own prompt in "" to override stt audio reanscription from file.
-    --verbose - Show logs and additional info in cli.
+Options:
+  --verbose                Enable verbose output - prints progress, token counts,
+                           cost breakdowns, and detailed debug information.
 
-[Examples]
-    # Normal usage - record from microphone or load an audio file
-    uv run main.py "audiofile.mp3"
+  --cost-single            Show the per-file cost  (useful for budgeting).
 
-    # Supply a custom prompt instead of transcribing audio
-    uv run main.py --prompt "Explain quantum entanglement in plain English."
+  --prompt                 Treat the first positional argument as a raw prompt
+                           (no transcript file is read). Mutually exclusive
+                           with --from-file and --from-dir.
 
-    # Get verbose output for debugging
-    uv run main.py "audiofile.mp3" --verbose
+  --no-tuning              Skip the Gemini LLM refinement step. The raw
+                           transcript is sent directly to the TTS engine.
+
+  --no-bucket-preserve     Delete the intermediate audio object from the Cloud
+                           Storage bucket after it has been downloaded locally.
+
+  --from-file              Load a single transcript file (default path is
+                           `transcriptions/tts_default.txt` if no positional
+                           argument is supplied).
+
+  --from-dir               Load **all** `.txt` files from the supplied
+                           directory. Each file is processed independently.
+
+  --help                   Show this help message and exit.
+
+Positional arguments:
+  ARGS...                  When --prompt is used, the first argument is the
+                           prompt text. When --from-file or --from-dir is used,
+                           the argument is the path to the file or directory.
+
+Examples:
+  # 1 Prompt → LLM → TTS → clean → timestamps
+  uv run main.py --prompt "Explain quantum entanglement in simple terms."
+
+  # 2 Batch processing of a directory, skip LLM tuning and show cost per file
+  uv run main.py --from-dir --no-tuning --cost-single ./my_transcripts
+
+  # 3 Use a specific file and delete the bucket copy after download
+  uv run main.py --from-file --no-bucket-preserve ./script.txt
+
+Notes:
+  • --prompt cannot be combined with --from-file or --from-dir.
+  • --from-file and --from-dir are mutually exclusive.
+  • All Google Cloud credentials are read from the `.env` file (VERTEX_AI_API_KEY,
+    SECRET_JSON_FILEPATH, BUCKET_NAME).
 ''' 
