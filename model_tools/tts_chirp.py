@@ -43,7 +43,7 @@ def _estimate_tts_price(text: str) -> (str, str):
 def _tts_configuration_init():
     voice = texttospeech.VoiceSelectionParams(
             language_code=LANGUAGE,
-            name="en-US-Chirp3-HD-" + TTS_VOICE,
+            name=f"{LANGUAGE}-Chirp3-HD-" + TTS_VOICE,
         )
 
     audio_config = texttospeech.AudioConfig(
