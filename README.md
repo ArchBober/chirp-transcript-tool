@@ -55,7 +55,7 @@ The astronomer smiled, realizing the universe had been humming a song all along,
 
 ### Command
 ```bash
-uv run main.py --from-file --no-bucket-preserve --verbose transcriptions/presentation_transcript.txt
+uv run main.py --from-file --tuning --verbose transcriptions/presentation_transcript.txt
 ```
 
 ### Log output
@@ -125,6 +125,34 @@ The astronomer smiled, realizing the universe had been humming a song all along 
 [{'word': 'A', 'start': np.float64(0.031), 'end': np.float64(0.573)}, {'word': 'lone', 'start': np.float64(0.593), 'end': np.float64(0.934)}, ... -> ...  {'word': 'listen.', 'start': np.float64(19.219), 'end': np.float64(19.66)}]
 ```
 
+or if srt file generated:
+
+```
+1
+00:00:00,000 --> 00:00:03,161
+A lone astronomer set up a telescope on a desert ridge, hoping the
+
+2
+00:00:03,221 --> 00:00:03,161
+clear night sky would reveal a secret.
+
+3
+00:00:03,221 --> 00:00:07,939
+When a faint flicker appeared, the instrument captured a pattern that
+
+4
+00:00:07,979 --> 00:00:07,939
+spelled out a long lost melody encoded in starlight.
+
+5
+00:00:07,979 --> 00:00:14,121
+The astronomer smiled, realizing the universe had been humming a song
+
+6
+00:00:14,320 --> 00:00:14,121
+all along, waiting for someone to listen.
+```
+
 ---
 
 ## Architecture Diagram
@@ -139,7 +167,7 @@ The astronomer smiled, realizing the universe had been humming a song all along 
 └─────────┬───────────┘
           ▼
 ┌───────────────────────────────────────┐
-│   Is LLM tuning enabled? (–no‑tuning) │
+│   Is LLM tuning enabled? (–‑tuning)   │
 └───────┬───────────────────────┬───────┘
         │                       │
    Yes  ▼                       ▼   No
@@ -237,6 +265,8 @@ The script loads these with `python-dotenv`.
 | `LLM_MODEL` | `"gemini-3-pro-preview"` – the Gemini model used for tuning. (can be changed to cheaper one model) |
 | `LLM_CHIRP_PROMPT` | Prompt that injects the **Chirp‑HD‑3** scripting guidelines (see `descriptions/prompt_chirp_doc.py` and `config.py`). |
 | `LLM_INPUT_TOKEN_PRICE`, `LLM_OUTPUT_TOKEN_PRICE`, `TTS_CHIRP_TOKEN_PRICE` | Pricing constants (USD per M tokens/characters). Update them if Google changes its rates. |
+| `SRT_MAX_CHARS` | Max characters for new line srt generation. |
+| `SRT_MAX_GAP` | Max time before new line in srt generation |
 
 ### Prompt documentation (`descriptions/prompt_chirp_doc.py` && `config.py`)  
 
@@ -251,8 +281,8 @@ Run the entry point with `uv run main.py`. Flags are defined in `tools/flags_par
 | `--verbose` | – | Print detailed progress and cost info. |
 | `--cost-single` | – | Show per‑file TTS cost. |
 | `--prompt` | – | First positional argument is treated as a raw prompt (no file reading). |
-| `--no‑tuning` | – | Skip the Gemini LLM step; feed transcripts straight to TTS. |
-| `--no‑bucket‑preserve` | – | Delete the temporary audio object from Cloud Storage after download. |
+| `--tuning` | – | Enable the Gemini LLM step; feed transcripts straight to TTS. |
+| `--bucket‑preserve` | – | Keep the temporary audio object in Cloud Storage after download. |
 | `--from‑file` | – | Load a **single** transcript file (default path or `TTS_TEXT_FILE`). |
 | `--from‑dir` | – | Load **all** `.txt` files from the supplied directory. |
 | `--help` | – | Show the help description (`HELP_DESCRIPTION`). |
@@ -279,7 +309,15 @@ All heavy‑weight I/O (bucket upload/download, TTS requests) is performed **asy
 
 ## Examples  
 
-### 1️⃣ Prompt → LLM → TTS → Clean → Timestamps  
+### 3️1️⃣ Using a file with not preserving copy on bucket and skipping tuning (skip LLM)  
+
+```bash
+uv run main.py \
+    --from-file \
+    --no-tuning ./script.txt
+```
+
+### 1️2️⃣ Prompt → LLM → TTS → Clean → Timestamps  (with preserving it in bucket)
 
 ```bash
 export VERTEX_AI_API_KEY=abcd123...890xyz
@@ -289,6 +327,8 @@ export BUCKET_NAME=chirp-audio-bucket
 uv run main.py \
     --prompt \
     --verbose \
+    --tuning \
+    --bucket-preserve \
     "What is lorem ipsum."
 
 ```
@@ -299,26 +339,17 @@ uv run main.py \
 * `edited_audio/name_<timpestamp>.wav` – silence‑removed version.  
 * `timestamped_transcriptions/output.txt` – JSON‑like list of `{word,start,end}`. (for now later add more options/ better option to save timestamps)
 
-### 2️⃣ Batch directory, skip LLM, keep bucket objects  
+### 2️3️⃣ Batch directory, skip LLM, keep bucket objects  
 
 ```bash
 uv run main.py \
     --from-dir \
-    --no-tuning \
     --cost-single ./my_transcripts
 
 ```
 
 Processes every `*.txt` under `./my_transcripts`, prints per‑file TTS cost, and leaves the intermediate objects in the bucket (useful for later inspection).
 
-### 3️⃣ Using a file not preserving copy on bucket and disabling tuning (skip LLM)  
-
-```bash
-uv run main.py \
-    --from-file \
-    --no-bucket-preserve \
-    --no-tuning ./script.txt
-```
 
 ## Cost reporting  
 

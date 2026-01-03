@@ -40,10 +40,6 @@ def main():
 
     flags, args = parse_flags()
 
-    if flags["verbose"]:
-        print("Initializing TTS client")
-
-
     if flags["prompt"]:
         transcripts = {}
         transcripts['prompt.txt'] = args.copy()[0]
@@ -53,7 +49,7 @@ def main():
         transcripts = read_transcripts(path, flags["from_dir"], flags["verbose"])
     
 
-    if not flags["no_tuning"]:
+    if flags["tuning"]:
         if flags["verbose"]:
             print("Initializing LLM client")
 
@@ -65,13 +61,16 @@ def main():
     else:
         llm_responses = transcripts.copy()
 
+    if flags["verbose"]:
+        print("Initializing TTS client")
+
     filepaths = asyncio.run(
         tts_chirp(
             llm_responses, 
             bucket_name, 
             credentials, 
             OUTPUT_AUDIO_DIR, 
-            flags["no_bucket_preserve"],
+            flags["bucket_preserve"],
             flags["cost_single"],
             flags["verbose"]
             )

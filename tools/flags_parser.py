@@ -36,14 +36,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Read the prompt from the command line (first positional arg)."
     )
     parser.add_argument(
-        "--no-tuning",
+        "--tuning",
         action="store_true",
-        help="Skip any model-tuning steps."
+        help="Model-tuning steps."
     )
     parser.add_argument(
-        "--no-bucket-preserve",
+        "--bucket-preserve",
         action="store_true",
-        help="Remove output from bucket after getting response."
+        help="Preserve output in bucket after getting response."
     )
     parser.add_argument(
         "--from-file",
@@ -87,10 +87,10 @@ def parse_flags() -> Tuple[Dict[str, object], List[str]]:
         "verbose": ns.verbose,
         "cost_single": ns.cost_single,
         "prompt": ns.prompt,
-        "no_tuning": ns.no_tuning,
+        "tuning": ns.tuning,
         "from_file": ns.from_file,
         "from_dir": ns.from_dir,
-        "no_bucket_preserve": ns.no_bucket_preserve,
+        "bucket_preserve": ns.bucket_preserve,
     }
 
     if flags["prompt"] and (flags["from_file"] or flags["from_dir"]):

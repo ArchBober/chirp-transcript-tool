@@ -9,7 +9,7 @@ from typing import Tuple, Dict, List
 
 from config import TTS_VOICE, LANGUAGE, SPEAKING_RATE, TTS_CHIRP_TOKEN_PRICE
 
-async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", no_preserve_file_in_bucket = True, cost_single: bool = False, verbose: bool = False) -> List[str]:
+async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", preserve_file_in_bucket = True, cost_single: bool = False, verbose: bool = False) -> List[str]:
     # try:
     if verbose:
         overall_tokens = 0.
@@ -17,7 +17,7 @@ async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials
         print(f"Setting TTS client with model and storage client (Chirp - {TTS_VOICE}) and sending request.")
 
     # for key, val in input_content.items():
-    coros = [_get_audio(key, val, credentials, save_dir, bucket_name, no_preserve_file_in_bucket, cost_single, verbose) for key, val in input_content.items()]
+    coros = [_get_audio(key, val, credentials, save_dir, bucket_name, preserve_file_in_bucket, cost_single, verbose) for key, val in input_content.items()]
 
 
     results = await asyncio.gather(*coros)
@@ -65,7 +65,7 @@ async def _get_audio(
     credentials,
     save_dir: str,
     bucket_name, 
-    no_preserve_file_in_bucket,
+    preserve_file_in_bucket,
     cost_single: bool,
     verbose: bool
 ):
@@ -117,7 +117,7 @@ async def _get_audio(
         
         blob.download_to_filename(save_filepath)
         
-        if no_preserve_file_in_bucket:
+        if not preserve_file_in_bucket:
             blob.delete()
             if verbose:
                 print(f"Blob deleted: {blob_name}")
