@@ -9,6 +9,8 @@ import sys
 import warnings
 import logging
 
+from config import SRT_MAX_GAP, SRT_MAX_CHARS
+
 # temp solution for 1000 warnings from whisper
 @contextlib.contextmanager
 def no_print():
@@ -40,7 +42,7 @@ def no_print():
             os.close(saved_stdout)
             os.close(saved_stderr)
 
-def stt_timestamps(audio_path, verbose: bool = False):
+def stt_timestamps(audio_path, verbose: bool = False, srt_timestamps: bool = True):
     """
     Takes an audio path, generates word-level timestamps using WhisperX.
     """
@@ -106,6 +108,19 @@ def stt_timestamps(audio_path, verbose: bool = False):
 
             if verbose:
                 print(f"Timestamps for file {filepath} generated.")
+
+            if srt_timestamps:
+                if verbose:
+                    print("Generating SRT timestamps")
+
+                word_timestamps = _timestamps_to_srt(word_timestamps, SRT_MAX_CHARS, SRT_MAX_GAP) # later ill refactror
+
+            filename = _get_transcript_filename(filepath.split('/')[-1])
+            _save_transcript(word_timestamps, filename)
+
+            if verbose:
+                print(f"Transcribing done file saved to {filename}")
+
         except Exception as e:
             print(f"Error processing {filepath}: {e}")
 
@@ -123,62 +138,103 @@ def stt_timestamps(audio_path, verbose: bool = False):
             # 3. Force PyTorch to empty the CUDA cache
             torch.cuda.empty_cache()
 
-        
-    with open("timestamped_transcriptions/output.txt", "w", encoding="utf-8") as f:
-        f.write(str(word_timestamps))
-
-    if verbose:
-        print("Transcribing done file saved to timestamped_transcriptions/output.txt")
-
     return word_timestamps
 
-def test_whisper(audio_filepath: str, verbose: bool = False) -> str:
-    if verbose:
-        print("Initializing STT client (Whisper)")
-    # ctrl+c ctrl+v from wshiper readme but work perfectly
-    stt_model = whisper.load_model("turbo")
+def _save_transcript(text: str, name: str = "output.txt", text_format: str = 'srt'):
+    with open(f"timestamped_transcriptions/{name}.{text_format}", "w", encoding="utf-8") as f:
+        f.write(str(text))
 
-    if verbose:
-        print(f"Loading audio from '{audio_filepath}' and finding language")
-    # load audio and pad/trim it to fit 30 seconds
-    audio = whisper.load_audio(audio_filepath)
-    audio = whisper.pad_or_trim(audio)
 
-    # make log-Mel spectrogram and move to the same device as the model
-    mel = whisper.log_mel_spectrogram(audio, n_mels=stt_model.dims.n_mels).to(stt_model.device)
+def _get_transcript_filename(filename: str) -> str:
+    filename_split = filename.split('.')
+    if len(filename_split) > 2:
+        raise Exception("multiple dots in text file")
+    return filename_split[0] + ".txt"
 
-    # detect the spoken language
-    # TODO add loop if lang != EN or enforce EN transciption
-    _, probs = stt_model.detect_language(mel)
-    if verbose:
-        print(f"Detected language: {max(probs, key=probs.get)}")
-        print("Decoding Audio")
-
-    # decode the audio
-    options = whisper.DecodingOptions()
-    result_audio_trans = whisper.decode(stt_model, mel, options)
-
-    del stt_model
-
-    # print the recognized text
-    if verbose:
-        print("\n---Audio Transcript---")
-        print(result_audio_trans.text)
-        print("------------\n")
-
-    return result_audio_trans.text
-
-if __name__ == "__main__":
-    # Your file in the project directory
-    my_audio_file = "chirp_output.wav" 
+def _timestamps_to_srt(word_list, max_chars=40, max_gap=2.0):
+    """
+    Converts a list of word dictionaries (with start/end timestamps) into SRT format.
     
-    try:
-        timestamps = get_timestamps(my_audio_file)
+    Args:
+        word_list (list): List of dicts e.g., [{'word': 'Hello', 'start': 0.5, 'end': 0.9}, ...]
+        max_chars (int): Maximum characters per subtitle line before splitting.
+        max_gap (float): Maximum gap (seconds) between words before forcing a new line.
+    
+    Returns:
+        str: The complete SRT formatted string.
+    """
+    
+    def format_time(seconds):
+        """Helper to convert seconds to HH:MM:SS,mmm format"""
+        seconds = float(seconds) # Ensure it's a standard float (not numpy)
+        millis = int((seconds % 1) * 1000)
+        seconds = int(seconds)
+        minutes = seconds // 60
+        hours = minutes // 60
+        minutes %= 60
+        seconds %= 60
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d},{millis:03d}"
+
+    srt_output = []
+    
+    if not word_list:
+        return ""
+
+    # Initialize variables for grouping
+    current_segment = []
+    segment_start = 0.
+    current_length = 0
+    idx = 1
+
+    sentence_endings = {'.', '!', '?'}
+    
+    for i, item in enumerate(word_list):
+        word = item['word']
+        start = float(item['start'])
+        end = float(item['end'])
         
-        # Print the first 5 words as a test
-        print("\nSuccess! Here are the first 5 words:")
-        for t in timestamps[:5]:
-            print(f"{t['start']:.2f} - {t['end']:.2f}: {t['word']}")
+        # Calculate gap from previous word (if not first word)
+        time_gap = 0
+        if i > 0:
+            prev_end = float(word_list[i-1]['end'])
+            time_gap = start - prev_end
             
-    except Exception as e:
-        print(f"Error: {e}")
+        
+        # DECISION: Start a new subtitle block?
+        # 1. If adding this word exceeds max characters
+        # 2. OR if there is a long silence (max_gap) before this word
+        if (current_length + len(word) + 1 > max_chars) or (time_gap > max_gap):
+            if current_segment:
+                # Finalize the previous segment
+                segment_end = float(word_list[i-1]['end'])
+                text = " ".join(current_segment)
+                srt_output.append(f"{idx}\n{format_time(segment_start)} --> {format_time(segment_end)}\n{text}\n")
+                idx += 1
+            
+            # Reset for new segment
+            current_segment = []
+            segment_start = start
+            current_length = 0
+
+        current_segment.append(word)
+        current_length += len(word) + 1 # +1 for the space
+
+        # DECISION: Force a NEW line AFTER adding this word?
+        # Check if this word ends with punctuation (., !, ?)
+        if word and word[-1] in sentence_endings:
+            segment_end_time = end
+            text = " ".join(current_segment)
+            srt_output.append(f"{idx}\n{format_time(segment_start)} --> {format_time(segment_end)}\n{text}\n")
+            idx += 1
+            
+            # Reset
+            current_segment = []
+            current_length = 0
+
+    # Flush the last remaining segment
+    if current_segment:
+        segment_end = float(word_list[-1]['end'])
+        text = " ".join(current_segment)
+        srt_output.append(f"{idx}\n{format_time(segment_start)} --> {format_time(segment_end)}\n{text}\n")
+
+    return "\n".join(srt_output)

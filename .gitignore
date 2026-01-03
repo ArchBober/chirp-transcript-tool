@@ -7,3 +7,5 @@ __pycache__/
 *.wav
 large-v2.pt
 output.txt
+work/
+timestamped_transcriptions/

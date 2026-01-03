@@ -79,7 +79,7 @@ def main():
 
     cut_filepaths = cut_silence(filepaths, EDITED_AUDIO_DIR, flags['verbose'])
 
-    timestamps = stt_timestamps(cut_filepaths, flags['verbose'])
+    timestamps = stt_timestamps(cut_filepaths, flags['verbose']) # for now last one will be returned
     
 
 if __name__ == "__main__":
