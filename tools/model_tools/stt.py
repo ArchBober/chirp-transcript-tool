@@ -115,8 +115,10 @@ def stt_timestamps(audio_path, verbose: bool = False, srt_timestamps: bool = Tru
 
                 word_timestamps = _timestamps_to_srt(word_timestamps, SRT_MAX_CHARS, SRT_MAX_GAP) # later ill refactror
 
-            filename = _get_transcript_filename(filepath.split('/')[-1])
-            _save_transcript(word_timestamps, filename)
+            file_dir = "/".join(filepath.split('/')[:-1])
+            filename = _get_transcript_filename(filepath)
+
+            _save_transcript(word_timestamps, file_dir, filename)
 
             if verbose:
                 print(f"Transcribing done file saved to {filename}")
@@ -140,16 +142,16 @@ def stt_timestamps(audio_path, verbose: bool = False, srt_timestamps: bool = Tru
 
     return word_timestamps
 
-def _save_transcript(text: str, name: str = "output.txt", text_format: str = 'srt'):
-    with open(f"timestamped_transcriptions/{name}.{text_format}", "w", encoding="utf-8") as f:
+def _save_transcript(text: str, file_dir: str = '', name: str = "output.txt", text_format: str = 'srt'):
+    with open(f"{file_dir}/{name}.{text_format}", "w", encoding="utf-8") as f:
         f.write(str(text))
 
 
-def _get_transcript_filename(filename: str) -> str:
-    filename_split = filename.split('.')
+def _get_transcript_filename(filepath: str) -> str:
+    filename_split = filepath.split('/')[-1].split('.')
     if len(filename_split) > 2:
         raise Exception("multiple dots in text file")
-    return filename_split[0] + ".txt"
+    return filename_split[0]
 
 def _timestamps_to_srt(word_list, max_chars=40, max_gap=2.0):
     """

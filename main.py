@@ -14,8 +14,9 @@ from tools.flags_parser import parse_flags
 from tools.read_transcripts import read_transcripts
 from tools.ffmpeg_cutter import cut_silence
 
-from tools.config import TTS_TEXT_FILE, LLM_CHIRP_PROMPT, OUTPUT_AUDIO_DIR, EDITED_AUDIO_DIR
 from tools.descriptions.help_description import HELP_DESCRIPTION
+
+from config import TTS_TEXT_FILE, LLM_CHIRP_PROMPT, OUTPUT_AUDIO_DIR, EDITED_AUDIO_DIR
 
 import warnings
 import logging
@@ -60,6 +61,8 @@ def main():
         llm_responses = llm(client_llm, transcripts, flags["cost_single"], flags["verbose"], LLM_CHIRP_PROMPT)
     else:
         llm_responses = transcripts.copy()
+
+    os.makedirs(OUTPUT_AUDIO_DIR, exist_ok=True)
 
     if flags["verbose"]:
         print("Initializing TTS client")

@@ -4,6 +4,7 @@ import time
 import io
 import gc
 import asyncio
+import os
 
 from typing import Tuple, Dict, List
 
@@ -11,7 +12,9 @@ from config import TTS_VOICE, LANGUAGE, SPEAKING_RATE, TTS_CHIRP_TOKEN_PRICE
 
 async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials, preserve_file_in_bucket = True, cost_single: bool = False, verbose: bool = False) -> List[str]:
     # try:
-    save_dir: str = "samples/temp"
+    save_dir = "temp"
+    os.makedirs(save_dir, exist_ok=True)
+    
     if verbose:
         overall_tokens = 0.
         overall_tokens_price = 0.
@@ -31,7 +34,7 @@ async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials
         print("===$$$===\n")
 
     # except Exception as e:
-    #     print(f"\nError: {e}")
+        # print(f"\nError: {e}")
     
     return filepaths
 
