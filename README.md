@@ -339,7 +339,7 @@ uv run main.py \
 * `edited_audio/name_<timpestamp>.wav` – silence‑removed version.  
 * `timestamped_transcriptions/output.txt` – JSON‑like list of `{word,start,end}`. (for now later add more options/ better option to save timestamps)
 
-### 2️3️⃣ Batch directory, skip LLM, keep bucket objects  
+### 2️3️⃣ Batch directory
 
 ```bash
 uv run main.py \
