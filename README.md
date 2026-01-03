@@ -129,27 +129,27 @@ or if srt file generated:
 
 ```
 1
-00:00:00,000 --> 00:00:03,161
+00:00:00,000 --> 00:00:03,722
 A lone astronomer set up a telescope on a desert ridge, hoping the
 
 2
-00:00:03,221 --> 00:00:03,161
+00:00:03,802 --> 00:00:05,588
 clear night sky would reveal a secret.
 
 3
-00:00:03,221 --> 00:00:07,939
+00:00:05,267 --> 00:00:09,179
 When a faint flicker appeared, the instrument captured a pattern that
 
 4
-00:00:07,979 --> 00:00:07,939
-spelled out a long lost melody encoded in starlight.
+00:00:09,259 --> 00:00:12,128
+spelled out a long-lost melody encoded in starlight.
 
 5
-00:00:07,979 --> 00:00:14,121
+00:00:11,667 --> 00:00:15,840
 The astronomer smiled, realizing the universe had been humming a song
 
 6
-00:00:14,320 --> 00:00:14,121
+00:00:15,881 --> 00:00:18,207
 all along, waiting for someone to listen.
 ```
 

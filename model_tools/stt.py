@@ -222,13 +222,14 @@ def _timestamps_to_srt(word_list, max_chars=40, max_gap=2.0):
         # DECISION: Force a NEW line AFTER adding this word?
         # Check if this word ends with punctuation (., !, ?)
         if word and word[-1] in sentence_endings:
-            segment_end_time = end
+            segment_end = end
             text = " ".join(current_segment)
             srt_output.append(f"{idx}\n{format_time(segment_start)} --> {format_time(segment_end)}\n{text}\n")
             idx += 1
             
             # Reset
             current_segment = []
+            segment_start = start
             current_length = 0
 
     # Flush the last remaining segment
