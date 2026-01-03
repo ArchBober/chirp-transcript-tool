@@ -9,7 +9,7 @@ import sys
 
 from typing import Tuple, Dict, List
 
-from descriptions.help_description import HELP_DESCRIPTION
+from tools.descriptions.help_description import HELP_DESCRIPTION
 
 
 def _build_parser() -> argparse.ArgumentParser:

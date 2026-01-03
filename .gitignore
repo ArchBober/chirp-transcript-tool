@@ -9,3 +9,7 @@ large-v2.pt
 output.txt
 work/
 timestamped_transcriptions/
+test_input_examples
+samples/
+output/
+input/

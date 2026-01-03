@@ -9,8 +9,9 @@ from typing import Tuple, Dict, List
 
 from config import TTS_VOICE, LANGUAGE, SPEAKING_RATE, TTS_CHIRP_TOKEN_PRICE
 
-async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials, save_dir: str = "response_audio", preserve_file_in_bucket = True, cost_single: bool = False, verbose: bool = False) -> List[str]:
+async def tts_chirp(input_content: Dict[str, str], bucket_name: str, credentials, preserve_file_in_bucket = True, cost_single: bool = False, verbose: bool = False) -> List[str]:
     # try:
+    save_dir: str = "samples/temp"
     if verbose:
         overall_tokens = 0.
         overall_tokens_price = 0.

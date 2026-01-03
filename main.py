@@ -6,16 +6,16 @@ from dotenv import load_dotenv
 import os
 import asyncio
 
-from model_tools.llm import llm
-from model_tools.tts_chirp import tts_chirp
-from model_tools.stt import stt_timestamps
+from tools.model_tools.llm import llm
+from tools.model_tools.tts_chirp import tts_chirp
+from tools.model_tools.stt import stt_timestamps
 
 from tools.flags_parser import parse_flags
 from tools.read_transcripts import read_transcripts
 from tools.ffmpeg_cutter import cut_silence
 
-from config import TTS_TEXT_FILE, LLM_CHIRP_PROMPT, OUTPUT_AUDIO_DIR, EDITED_AUDIO_DIR
-from descriptions.help_description import HELP_DESCRIPTION
+from tools.config import TTS_TEXT_FILE, LLM_CHIRP_PROMPT, OUTPUT_AUDIO_DIR, EDITED_AUDIO_DIR
+from tools.descriptions.help_description import HELP_DESCRIPTION
 
 import warnings
 import logging
@@ -69,14 +69,13 @@ def main():
             llm_responses, 
             bucket_name, 
             credentials, 
-            OUTPUT_AUDIO_DIR, 
             flags["bucket_preserve"],
             flags["cost_single"],
             flags["verbose"]
             )
         )
 
-    cut_filepaths = cut_silence(filepaths, EDITED_AUDIO_DIR, flags['verbose'])
+    cut_filepaths = cut_silence(filepaths, OUTPUT_AUDIO_DIR, flags['verbose'])
 
     timestamps = stt_timestamps(cut_filepaths, flags['verbose']) # for now last one will be returned
     

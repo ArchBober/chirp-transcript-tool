@@ -1,8 +1,8 @@
-from descriptions.prompt_chirp_doc import prompt_chirp_doc
+from tools.descriptions.prompt_chirp_doc import prompt_chirp_doc
 
 TTS_TEXT_FILE = 'transcriptions/tts_default.txt'
 
-OUTPUT_AUDIO_DIR = "response_audio"
+OUTPUT_AUDIO_DIR = "samples/temp"
 EDITED_AUDIO_DIR = "edited_audio"
 
 SPEAKING_RATE = 1.1 # 1 is default - use range 0.5-2.0
