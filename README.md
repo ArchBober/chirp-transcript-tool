@@ -1,5 +1,9 @@
 # chirp‑transcript‑tool  
-
+    
+## Motivation
+## Quick Start
+## Usage
+## Contributing
 > **TL;DR** – Turn one or many plain‑text transcripts into natural‑sounding speech, clean the audio, and get timestamps – all in a single command‑line run.  
 
 The tool stitches together four Google Cloud services such as Vertex AI Gemini, Cloud Text‑to‑Speech (Chirp‑HD‑3), Cloud Storage (buckets) with two open‑source libraries (ffmpeg, WhisperX) and a tiny CLI wrapper that handles flag parsing, cost reporting, and error handling.
